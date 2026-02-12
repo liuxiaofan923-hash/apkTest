@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>练习 | TypeQuest</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --accent-primary: #00ff88;
+            --accent-secondary: #ff00ff;
+            --accent-tertiary: #00d4ff;
+            --text-primary: #ffffff;
+            --text-secondary: #6b7280;
+            --text-dim: #3a3a4a;
+            --error-red: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px);
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(to bottom, var(--bg-primary) 0%, transparent 100%);
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .logo a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a.active {
+            color: var(--accent-primary);
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--accent-primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a.active::after,
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .main {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8rem 2rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bg-secondary);
+            padding: 0.375rem;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 136, 0.1);
+        }
+
+        .difficulty-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            padding: 0.5rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 6px;
+        }
+
+        .difficulty-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .difficulty-btn.active {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            font-weight: 600;
+        }
+
+        .keyboard-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .keyboard-toggle:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .keyboard-toggle .toggle-icon {
+            width: 40px;
+            height: 20px;
+            background: var(--text-dim);
+            border-radius: 10px;
+            position: relative;
+            transition: background 0.3s ease;
+        }
+
+        .keyboard-toggle.active .toggle-icon {
+            background: var(--accent-primary);
+        }
+
+        .keyboard-toggle .toggle-icon::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: var(--text-primary);
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s ease;
+        }
+
+        .keyboard-toggle.active .toggle-icon::after {
+            left: 22px;
+        }
+
+        .keyboard-toggle span {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 3rem;
+            margin-bottom: 3rem;
+            padding: 1rem 2rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 136, 0.1);
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            min-width: 3rem;
+        }
+
+        .stat-unit {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .typing-area {
+            width: 100%;
+            position: relative;
+        }
+
+        .typing-box {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 12px;
+            padding: 3rem;
+            font-size: 1.5rem;
+            line-height: 2;
+            position: relative;
+            min-height: 200px;
+            overflow: hidden;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .typing-box:focus-within {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
+        }
+
+        .typing-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-primary);
+            opacity: 0.5;
+        }
+
+        .typing-box::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            border-bottom: 2px solid var(--accent-primary);
+            border-right: 2px solid var(--accent-primary);
+        }
+
+        .text-display {
+            position: relative;
+            user-select: none;
+        }
+
+        .char {
+            position: relative;
+            color: var(--text-dim);
+            transition: color 0.1s ease;
+        }
+
+        .char.correct {
+            color: var(--accent-primary);
+        }
+
+        .char.incorrect {
+            color: var(--error-red);
+            text-decoration: underline;
+            text-decoration-color: var(--error-red);
+        }
+
+        .char.current {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .hidden-input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .start-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(18, 18, 26, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            backdrop-filter: blur(4px);
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .start-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .start-overlay p {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .start-overlay .shortcut {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--accent-primary);
+            padding: 0.5rem 1rem;
+            color: var(--accent-primary);
+            font-size: 0.875rem;
+            border-radius: 4px;
+        }
+
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .results-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .results-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent-primary);
+            border-radius: 16px;
+            padding: 3rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.2);
+        }
+
+        .results-content h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--accent-primary);
+        }
+
+        .results-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .result-stat .value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .result-stat .label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 0.5rem;
+        }
+
+        .restart-btn {
+            background: var(--accent-primary);
+            border: none;
+            color: var(--bg-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 1rem 2.5rem;
+            cursor: pointer;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-secondary);
+            margin-top: 2rem;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-tertiary));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .virtual-keyboard {
+            width: 100%;
+            max-width: 900px;
+            margin-top: 3rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .virtual-keyboard.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .key {
+            min-width: 44px;
+            height: 44px;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .key.wide {
+            min-width: 64px;
+        }
+
+        .key.wider {
+            min-width: 84px;
+        }
+
+        .key.space {
+            min-width: 280px;
+        }
+
+        .key.current-key {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            transform: scale(1.1);
+        }
+
+        .key.correct-key {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: var(--accent-primary);
+        }
+
+        .key.incorrect-key {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--error-red);
+        }
+
+        .keyboard-hint {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-top: 1rem;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                padding: 1rem 1.5rem;
+            }
+
+            .nav-links {
+                gap: 1.5rem;
+            }
+
+            .nav-links a:not(.active) {
+                display: none;
+            }
+
+            .header {
+                flex-direction: column;
+                align: flex-start;
+                gap: 1rem;
+            }
+
+            .header-controls {
+                width: 100%;
+            }
+
+            .stats-bar {
+                gap: 1.5rem;
+                flex-wrap: wrap;
+            }
+
+            .typing-box {
+                font-size: 1.125rem;
+                padding: 2rem 1.5rem;
+            }
+
+            .results-stats {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .virtual-keyboard {
+                transform: scale(0.7);
+                transform-origin: top center;
+            }
+
+            .key {
+                min-width: 36px;
+                height: 36px;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="logo"><a href="index.html">Type</a>Quest</div>
+        <div class="nav-links">
+            <a href="practice.html" class="active">练习</a>
+            <a href="leaderboard.html">排行榜</a>
+            <a href="achievements.html">成就</a>
+            <a href="about.html">关于</a>
+        </div>
+    </nav>
+
+    <div class="main">
+        <div class="header">
+            <h1>打字练习</h1>
+            <div class="header-controls">
+                <div class="difficulty-selector">
+                    <button class="difficulty-btn active" data-difficulty="easy">简单</button>
+                    <button class="difficulty-btn" data-difficulty="medium">中等</button>
+                    <button class="difficulty-btn" data-difficulty="hard">困难</button>
+                    <button class="difficulty-btn" data-difficulty="expert">专家</button>
+                </div>
+                <div class="keyboard-toggle active" id="keyboardToggle">
+                    <div class="toggle-icon"></div>
+                    <span>键盘指引</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-value" id="wpm">0</span>
+                <span class="stat-unit">WPM</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="accuracy">100</span>
+                <span class="stat-unit">准确率</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="timer">0:00</span>
+                <span class="stat-unit">时间</span>
+            </div>
+        </div>
+
+        <div class="typing-area">
+            <div class="typing-box" id="typingBox">
+                <div class="text-display" id="textDisplay"></div>
+            </div>
+            <input type="text" class="hidden-input" id="hiddenInput" autocomplete="off" autocapitalize="off">
+
+            <div class="start-overlay" id="startOverlay">
+                <p>点击此处或按 <span class="shortcut">空格键</span> 开始</p>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="virtual-keyboard" id="virtualKeyboard">
+            <div class="keyboard-row">
+                <div class="key" data-key="`">~</div>
+                <div class="key" data-key="1">1</div>
+                <div class="key" data-key="2">2</div>
+                <div class="key" data-key="3">3</div>
+                <div class="key" data-key="4">4</div>
+                <div class="key" data-key="5">5</div>
+                <div class="key" data-key="6">6</div>
+                               <div class="key" data-key="7">7</div>
+                <div class="key" data-key="8">8</div>
+                <div class="key" data-key="9">9</div>
+                <div class="key" data-key="0">0</div>
+                <div class="key" data-key="-">-</div>
+                <div class="key" data-key="=">=</div>
+                <div class="key wide" data-key="Backspace">⌫</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key wide" data-key="Tab">Tab</div>
+                <div class="key" data-key="q">Q</div>
+                <div class="key" data-key="w">W</div>
+                <div class="key" data-key="e">E</div>
+                <div class="key" data-key="r">R</div>
+                <div class="key" data-key="t">T</div>
+                <div class="key" data-key="y">Y</div>
+                <div class="key" data-key="u">U</div>
+                <div class="key" data-key="i">I</div>
+                <div class="key" data-key="o">O</div>
+                <div class="key" data-key="p">P</div>
+                <div class="key" data-key="[">[</div>
+                <div class="key" data-key="]">]</div>
+                <div class="key wider" data-key="">\</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key wider" data-key="CapsLock">Caps</div>
+                <div class="key" data-key="a">a</div>
+                <div class="key" data-key="s">S</div>
+                <div class="key" data-key="d">D</div>
+                <div class="key" data-key="f">F</div>
+                <div class="key" data-key="g">G</div>
+                <div class="key" data-key="h">H</div>
+                <div class="key" data-key="j">J</div>
+                <div class="key" data-key="k">K</div>
+                <div class="key" data-key="l">L</div>
+                <div class="key" data-key=";">;</div>
+                <div class="key" data-key="'">'</div>
+                <div class="key wide" data-key="Enter">↵</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key wider" data-key="Shift">Shift</div>
+                <div class="key" data-key="z">Z</div>
+                <div class="key" data-key="x">X</div>
+                <div class="key" data-key="c">C</div>
+                <div class="key" data-key="v">V</div>
+                <div class="key" data-key="b">B</div>
+                <div class="key" data-key="n">N</div>
+                <div class="key" data-key="m">M</div>
+                <div class="key" data-key=",">,</div>
+                <div class="key" data-key=".">.</div>
+                <div class="key" data-key="/">/</div>
+                <div class="key wider" data-key="Shift">Shift</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key wider" data-key="Control">Ctrl</div>
+                <div class="key" data-key="Meta">⌘</div>
+                <div class="key" data-key="Alt">Alt</div>
+                <div class="key space" data-key=" ">Space</div>
+                <div class="key" data-key="Alt">Alt</div>
+                <div class="key" data-key="Meta">⌘</div>
+                <div class="key wider" data-key="Control">Ctrl</div>
+            </div>
+            <div class="keyboard-hint">高亮显示需要按下的键位</div>
+        </div>
+    </div>
+
+    <div class="results-modal" id="resultsModal">
+        <div class="results-content">
+            <h2>练习完成</h2>
+            <div class="results-stats">
+                <div class="result-stat">
+                    <div class="value" id="finalWpm">0</div>
+                    <div class="label">WPM</div>
+                </div>
+                <div class="result-stat">
+                    <div class="value" id="finalAccuracy">100</div>
+                    <div class="label">准确率 %</div>
+                </div>
+                <div class="result-stat">
+                    <div class="value" id="finalTime">0:00</div>
+                    <div class="label">用时</div>
+                </div>
+            </div>
+            <button class="restart-btn" id="restartBtn">再来一次</button>
+        </div>
+    </div>
+
+    <script>
+        const texts = {
+            easy: ["The quick brown fox jumps over lazy dog. A fast cat runs past slow turtle."],
+            medium: ["Programming requires patience and practice. Debugging code teaches valuable lessons about logic."],
+            hard: ["Neural networks learn patterns through iterative optimization of weights using algorithms."],
+            expert: ["function fibonacci(n) { return n <= 1 ? n : fibonacci(n-1) + fibonacci(n-2); } const memo = new Map();"]
+        };
+
+        let currentText = "";
+        let currentIndex = 0;
+        let startTime = null;
+        let timerInterval = null;
+        let correctChars = 0;
+        let totalCharsTyped = 0;
+        let isStarted = false;
+        let currentDifficulty = "easy";
+        let keyboardVisible = true;
+
+        const textDisplay = document.getElementById("textDisplay");
+        const hiddenInput = document.getElementById("hiddenInput");
+        const typingBox = document.getElementById("typingBox");
+        const startOverlay = document.getElementById("startOverlay");
+        const wpmEl = document.getElementById("wpm");
+        const accuracyEl = document.getElementById("accuracy");
+        const timerEl = document.getElementById("timer");
+        const progressFill = document.getElementById("progressFill");
+        const resultsModal = document.getElementById("resultsModal");
+        const restartBtn = document.getElementById("restartBtn");
+        const difficultyBtns = document.querySelectorAll(".difficulty-btn");
+        const keyboardToggle = document.getElementById("keyboardToggle");
+        const virtualKeyboard = document.getElementById("virtualKeyboard");
+        const keys = document.querySelectorAll(".key");
+
+        const keyMap = {
+            "`": "`", "1": "1", "2": "2", "3": "3", "4": "4", "5": "5",
+            "6": "6", "7": "7", "8": "8", "9": "9", "0": "0",
+            "-": "-", "=": "=", "Backspace": "Backspace", "Tab": "Tab",
+            "q": "q", "w": "w", "e": "e", "r": "r", "t": "t", "y": "y",
+            "u": "u", "i": "i", "o": "o", "p": "p", "[": "[", "]": "]",
+            "\\": "\\", "a": "a", "s": "s", "d": "d", "f": "f", "g": "g",
+            "h": "h", "j": "j", "k": "k", "l": "l", ";": ";", "'": "'",
+            "Enter": "Enter", "z": "z", "x": "x", "c": "c", "v": "v",
+            "b": "b", "n": "n", "m": "m", ",": ",", ".": ".", "/": "/",
+            " ": " "
+        };
+
+        function init() {
+            loadNewText();
+            setupEventListeners();
+            updateKeyboardHighlight();
+            virtualKeyboard.classList.add("visible");
+        }
+
+        function loadNewText() {
+            const textArray = texts[currentDifficulty];
+            currentText = textArray[Math.floor(Math.random() * textArray.length)];
+            displayText();
+            updateKeyboardHighlight();
+        }
+
+        function displayText() {
+            textDisplay.innerHTML = currentText.split("").map(function(char, index) {
+                return '<span class="char ' + (index === 0 ? "current" : "") + '">' + char + "</span>";
+            }).join("");
+        }
+
+        function setupEventListeners() {
+            typingBox.addEventListener("click", startTyping);
+            startOverlay.addEventListener("click", startTyping);
+            hiddenInput.addEventListener("input", handleInput);
+            hiddenInput.addEventListener("keydown", handleKeyDown);
+
+            difficultyBtns.forEach(function(btn) {
+                btn.addEventListener("click", function() {
+                    difficultyBtns.forEach(function(b) { b.classList.remove("active"); });
+                    btn.classList.add("active");
+                    currentDifficulty = btn.dataset.difficulty;
+                    resetGame();
+                });
+            });
+
+            keyboardToggle.addEventListener("click", function() {
+                keyboardVisible = !keyboardVisible;
+                keyboardToggle.classList.toggle("active", keyboardVisible);
+                virtualKeyboard.classList.toggle("visible", keyboardVisible);
+            });
+
+            restartBtn.addEventListener("click", function() {
+                resultsModal.classList.remove("show");
+                resetGame();
+            });
+
+            document.addEventListener("keydown", function(e) {
+                if (!resultsModal.classList.contains("show")) {
+                    hiddenInput.focus();
+                }
+            });
+        }
+
+
+        function startTyping() {
+            if (!isStarted) {
+                isStarted = true;
+                startOverlay.classList.add("hidden");
+                hiddenInput.focus();
+                startTime = Date.now();
+                timerInterval = setInterval(updateTimer, 100);
+            }
+        }
+
+        function handleInput(e) {
+            if (!isStarted) return;
+
+            const input = e.data;
+            const chars = textDisplay.querySelectorAll(".char");
+
+            if (input) {
+                totalCharsTyped++;
+                const currentChar = chars[currentIndex];
+
+                if (currentChar) {
+                    if (input === currentChar.textContent) {
+                        currentChar.classList.add("correct");
+                        correctChars++;
+                    } else {
+                        currentChar.classList.add("incorrect");
+                    }
+
+                    currentChar.classList.remove("current");
+                    currentIndex++;
+
+                    if (currentIndex < chars.length) {
+                        chars[currentIndex].classList.add("current");
+                    } else {
+                        endGame();
+                    }
+                }
+
+                updateStats();
+                updateProgress();
+                updateKeyboardHighlight();
+            }
+
+            hiddenInput.value = "";
+        }
+
+        function handleKeyDown(e) {
+            if (!isStarted && e.code === "Space") {
+                e.preventDefault();
+                startTyping();
+                return;
+            }
+
+            if (isStarted && e.key === "Backspace") {
+                const chars = textDisplay.querySelectorAll(".char");
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    chars[currentIndex].classList.remove("correct", "incorrect");
+                    chars[currentIndex].classList.add("current");
+                    if (currentIndex + 1 < chars.length) {
+                        chars[currentIndex + 1].classList.remove("current");
+                    }
+                }
+                updateKeyboardHighlight();
+            }
+        }
+
+        function highlightKey(keyData, className) {
+            keys.forEach(function(keyEl) {
+                if (keyEl.dataset.key === keyData) {
+                    keyEl.classList.add(className);
+                }
+            });
+        }
+
+        function clearKeyHighlight(className) {
+            keys.forEach(function(keyEl) {
+                keyEl.classList.remove(className);
+            });
+        }
+
+        function updateKeyboardHighlight() {
+            keys.forEach(function(keyEl) {
+                keyEl.classList.remove("current-key", "correct-key", "incorrect-key");
+            });
+
+            if (currentIndex < currentText.length) {
+                const nextChar = currentText[currentIndex].toLowerCase();
+                if (keyMap[nextChar]) {
+                    keys.forEach(function(keyEl) {
+                        if (keyEl.dataset.key === nextChar) {
+                            keyEl.classList.add("current-key");
+                        }
+                    });
+                } else if (nextChar === " ") {
+                    keys.forEach(function(keyEl) {
+                        if (keyEl.dataset.key === " ") {
+                            keyEl.classList.add("current-key");
+                        }
+                    });
+                }
+            }
+        }
+
+        function updateStats() {
+            if (startTime) {
+                const timeInMinutes = (Date.now() - startTime) / 60000;
+                const wpm = timeInMinutes > 0 ? Math.round((correctChars / 5) / timeInMinutes) : 0;
+                wpmEl.textContent = wpm;
+            }
+
+            const accuracy = totalCharsTyped > 0 ? Math.round((correctChars / totalCharsTyped) * 100) : 100;
+            accuracyEl.textContent = accuracy;
+        }
+
+        function updateTimer() {
+            if (startTime) {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                timerEl.textContent = minutes + ":" + seconds.toString().padStart(2, "0");
+            }
+        }
+
+        function updateProgress() {
+            const progress = (currentIndex / currentText.length) * 100;
+            progressFill.style.width = progress + "%";
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            isStarted = false;
+
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+
+            document.getElementById("finalWpm").textContent = wpmEl.textContent;
+            document.getElementById("finalAccuracy").textContent = accuracyEl.textContent;
+            document.getElementById("finalTime").textContent = minutes + ":" + seconds.toString().padStart(2, "0");
+
+            resultsModal.classList.add("show");
+        }
+
+        function resetGame() {
+            clearInterval(timerInterval);
+            currentIndex = 0;
+            correctChars = 0;
+            totalCharsTyped = 0;
+            startTime = null;
+            isStarted = false;
+
+            wpmEl.textContent = "0";
+            accuracyEl.textContent = "100";
+            timerEl.textContent = "0:00";
+            progressFill.style.width = "0%";
+
+            loadNewText();
+            startOverlay.classList.remove("hidden");
+            clearKeyHighlight("correct-key");
+            clearKeyHighlight("incorrect-key");
+        }
+
+        init();
+    </script>
+</body>
+</html>

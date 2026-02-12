@@ -1,0 +1,14 @@
+{
+  "name": "typequest",
+  "version": "1.0.0",
+  "description": "极速打字练习 - TypeQuest",
+  "scripts": {
+    "dev": "cap serve",
+    "build": "cap build android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/cli": "^8.1.0",
+    "@capacitor/core": "^8.1.0"
+  }
+}

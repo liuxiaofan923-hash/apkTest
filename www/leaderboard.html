@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排行榜 | Type TypeQuest</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --accent-primary: #00ff88;
+            --accent-secondary: #ff00ff;
+            --accent-tertiary: #00d4ff;
+            --text-primary: #ffffff;
+            --text-secondary: #6b7280;
+            --text-dim: #3a3a4a;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* CRT Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        /* Ambient Glow */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                ellipse at center,
+                rgba(0, 255, 136, 0.02) 0%,
+                transparent 70%
+            );
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(
+                to bottom,
+                var(--bg-primary) 0%,
+                transparent 100%
+            );
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .logo a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a.active {
+            color: var(--accent-primary);
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--accent-primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a.active::after,
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Main Container */
+        .main {
+            min-height: 100vh;
+            padding: 8rem 2rem 4rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Time Filter */
+        .filter-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .filter-tab {
+            background: transparent;
+            border: 1px solid var(--text-dim);
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            padding: 0.625rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .filter-tab:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .filter-tab.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        /* Leaderboard Table */
+        .leaderboard {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(0, 255, 136, 0.15);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .leaderboard::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-primary);
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 60px 1fr 120px 120px 120px;
+            padding: 1.25rem 2rem;
+            border-bottom: 1px solid var(--text-dim);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .leaderboard-rows {
+            position: relative;
+        }
+
+        .leaderboard-rows::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-primary);
+            opacity: 0.5;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 60px 1fr 120px 120px 120px;
+            padding: 1.25rem 2rem;
+            align-items: center;
+            border-bottom: 1px solid rgba(58, 58, 74, 0.5);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .row:last-child {
+            border-bottom: none;
+        }
+
+        .row:hover {
+            background: rgba(0, 255, 136, 0.05);
+            transform: translateX(4px);
+        }
+
+        /* Rank styling */
+        .rank {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rank-1 {
+            color: var(--gold);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .rank-2 {
+            color: var(--silver);
+        }
+
+        .rank-3 {
+            color: var(--bronze);
+        }
+
+        .rank-badge {
+            font-size: 1.5rem;
+        }
+
+        /* User info */
+        .user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: var(--text-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .row:hover .avatar {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .username {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .user-title {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Stats */
+        .stat {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+
+        .stat-label {
+            display: none;
+        }
+
+        /* Current user highlight */
+        .row.current-user {
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .row.current-user::after {
+            content: 'YOU';
+            position: absolute;
+            right: 1rem;
+            font-size: 0.625rem;
+            color: var(--accent-primary);
+            padding: 0.25rem 0.5rem;
+            border: 1px solid var(--accent-primary);
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 3rem;
+        }
+
+        .page-btn {
+            background: transparent;
+            border: 1px solid var(--text-dim);
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .page-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .page-btn.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        .page-nav {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .page-nav:hover {
+            color: var(--accent-primary);
+        }
+
+        /* ASCII decoration */
+        .ascii-rank {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            font-size: 0.6rem;
+            color: rgba(255, 215, 0, 0.3);
+            line-height: 1.2;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav {
+                padding: 1rem 1.5rem;
+            }
+
+            .nav-links a:not(.active) {
+                display: none;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .table-header,
+            .row {
+                grid-template-columns: 50px 1fr 80px;
+            }
+
+            .table-header > *:nth-child(4),
+            .table-header > *:nth-child(5),
+            .row > *:nth-child(4),
+            .row > *:nth-child(5) {
+                display: none;
+            }
+
+            .ascii-rank {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="logo"><a href="index.html">Type</a>Quest</div>
+        <div class="nav-links">
+            <a href="practice.html">练习</a>
+            <a href="leaderboard.html" class="active">排行榜</a>
+            <a href="achievements.html">成就</a>
+            <a href="about.html">关于</a>
+        </div>
+    </nav>
+
+    <div class="main">
+        <div class="header">
+            <h1>排行榜</h1>
+            <p>全球最快打字者</p>
+        </div>
+
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">全部时间</button>
+            <button class="filter-tab" data-filter="week">本周</button>
+            <button class="filter-tab" data-filter="day">今日</button>
+        </div>
+
+        <div class="leaderboard">
+            <div class="table-header">
+                <div>排名</div>
+                <div>用户</div>
+                <div>WPM</div>
+                <div>准确率</div>
+                <div>次数</div>
+            </div>
+            <div class="leaderboard-rows" id="leaderboardRows">
+                <!-- Rows will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="pagination">
+            <button class="page-nav">‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">...</button>
+            <button class="page-btn">10</button>
+            <button class="page-nav">›</button>
+        </div>
+    </div>
+
+    <div class="ascii-rank">
+    ╔══════════════════════╗<br>
+    ║  🏆 ELITE TYPERS  🏆  ║<br>
+    ╚══════════════════════╝
+    </div>
+
+    <script>
+        // Sample leaderboard data
+        const leaderboardData = [
+            { rank: 1, username: 'SpeedDemon', title: 'Grandmaster', wpm: 157, accuracy: 99.8, tests: 2847, avatar: 'S' },
+            { rank: 2, username: 'TypingNinja', title: 'Master', wpm: 152, accuracy: 99.5, tests: 2134, avatar: 'T' },
+            { rank: 3, username: 'CodeMonkey', title: 'Expert', wpm: 148, accuracy: 99.2, tests: 1876, avatar: 'C' },
+            { rank: 4, username: 'FastFingers', title: 'Advanced', wpm: 145, accuracy: 98.9, tests: 1567, avatar: 'F' },
+            { rank: 5, username: 'KeyboardWarrior', title: 'Advanced', wpm: 142, accuracy: 98.7, tests: 1432, avatar: 'K' },
+            { rank: 6, username: 'TypeQuest', title: 'Intermediate', wpm: 138, accuracy: 98.5, tests: 1234, avatar: 'Q' },
+            { rank: 7, username: 'SwiftTypist', title: 'Intermediate', wpm: 135, accuracy: 98.2, tests: 1156, avatar: 'S' },
+            { rank: 8, username: 'QuickSilver', title: 'Intermediate', wpm: 132, accuracy: 98.0, tests: 1087, avatar: 'Q' },
+            { rank: 9, username: 'RapidFire', title: 'Intermediate', wpm: 128, accuracy: 97.8, tests: 987, avatar: 'R' },
+            { rank: 10, username: 'Blaze', title: 'Beginner', wpm: 125, accuracy: 97.5, tests: 876, avatar: 'B' },
+        ];
+
+        const rowsContainer = document.getElementById('leaderboardRows');
+        const filterTabs = document.querySelectorAll('.filter-tab');
+
+        // Render leaderboard rows
+        function renderLeaderboard(data) {
+            rowsContainer.innerHTML = data.map((user, index) => {
+                const rankClass = user.rank <= 3 ? `rank-${user.rank}` : '';
+                const rankBadge = user.rank <= 3 ? getRankBadge(user.rank) : '';
+                const isCurrentUser = user.username === 'TypeQuest' ? 'current-user' : '';
+
+                return `
+                    <div class="row ${isCurrentUser}" style="animation: fadeSlide 0.5s ease ${index * 0.1}s both">
+                        <div class="rank ${rankClass}">
+                            ${rankBadge || user.rank}
+                        </div>
+                        <div class="user">
+                            <div class="avatar">${user.avatar}</div>
+                            <div class="user-info">
+                                <span class="username">${user.username}</span>
+                                <span class="user-title">${user.title}</span>
+                            </div>
+                        </div>
+                        <div class="stat">${user.wpm}</div>
+                        <div class="stat">${user.accuracy}%</div>
+                        <div class="stat">${user.tests}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getRankBadge(rank) {
+            const badges = {
+                1: '🥇',
+                2: '🥈',
+                3: '🥉'
+            };
+            return badges[rank] || '';
+        }
+
+        // Filter tabs functionality
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                filterTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Simulate filtering by shuffling data
+                const shuffled = [...leaderboardData].sort(() => Math.random() - 0.5);
+                shuffled.forEach((user, index) => user.rank = index + 1);
+                renderLeaderboard(shuffled);
+            });
+        });
+
+        // Pagination functionality
+        const pageBtns = document.querySelectorAll('.page-btn');
+        pageBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.textContent !== '...') {
+                    pageBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    // Simulate pagination by shuffling
+                    const shuffled = [...leaderboardData].sort(() => Math.random() - 0.5);
+                    shuffled.forEach((user, index) => user.rank = index + 1);
+                    renderLeaderboard(shuffled);
+                }
+            });
+        });
+
+        // Add animation keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeSlide {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initial render
+        renderLeaderboard(leaderboardData);
+    </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(test:*)",
+      "Bash(node -e \"try { require\\(''fs''\\).readFileSync\\(''practice.html'', ''utf8''\\); console.log\\(''HTML syntax OK''\\); } catch\\(e\\) { console.log\\(''Error:'', e.message\\); }\")",
+      "Bash(node -e \"try { require require\\(''fs''\\).readFileSync\\(''practice.html'', ''utf8''\\); console.log\\(''File OK''\\); } catch\\(e\\) { console.log\\(''Error:'', e.message\\); }\")",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(npx cap init:*)",
+      "Bash(npx cap add android:*)",
+      "Bash(npx cap sync:*)",
+      "Bash(java:*)",
+      "Bash(where java)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\n初始化 TypeQuest Android 项目\n\n- 添加 Capacitor 配置\n- 配置横屏模式支持\n- 添加 GitHub Actions 自动构建\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")"
+    ]
+  }
+}

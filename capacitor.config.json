@@ -1,0 +1,12 @@
+{
+  "appId": "com.typequest.app",
+  "appName": "TypeQuest",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true
+  }
+}

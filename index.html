@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeQuest | 极速打字练习</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --accent-primary: #00ff88;
+            --accent-secondary: #ff00ff;
+            --accent-tertiary: #00d4ff;
+            --text-primary: #ffffff;
+            --text-secondary: #6b7280;
+            --terminal-green: #22c55e;
+            --error-red: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        /* CRT Scanlines Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        /* Ambient Glow */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                ellipse at center,
+                rgba(0, 255, 136, 0.03) 0%,
+                transparent 70%
+            );
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(
+                to bottom,
+                var(--bg-primary) 0%,
+                transparent 100%
+            );
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .logo span {
+            animation: glitch 3s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 90%, 100% { text-shadow: none; }
+            91% { text-shadow: 2px 0 var(--accent-secondary), -2px 0 var(--accent-tertiary); }
+            92% { text-shadow: -2px 0 var(--accent-secondary), 2px 0 var(--accent-tertiary); }
+            93% { text-shadow: none; }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--accent-primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Main Content */
+        .main {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 2rem;
+            position: relative;
+        }
+
+        /* Terminal Header */
+        .terminal-header {
+            margin-bottom: 4rem;
+            opacity: 0;
+            animation: fadeIn 0.8s ease 0.5s forwards;
+        }
+
+        .terminal-prompt {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .terminal-prompt .path {
+            color: var(--accent-primary);
+        }
+
+        .terminal-prompt .command {
+            color: var(--text-primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            max-width: 900px;
+        }
+
+        .title-wrapper {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(3rem, 8vw, 7rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            background: linear-gradient(
+                135deg,
+                var(--text-primary) 0%,
+                var(--accent-primary) 50%,
+                var(--accent-tertiary) 100%
+            );
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 8s ease infinite;
+            opacity: 0;
+            animation: gradientShift 8s ease infinite, fadeIn 1s ease 0.8s forwards;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .title-wrapper::before,
+        .title-wrapper::after {
+            content: 'TYPEQUEST';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(3rem, 8vw, 7rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .title-wrapper::before {
+            color: var(--accent-secondary);
+            animation: glitchTop 4s infinite;
+        }
+
+        .title-wrapper::after {
+            color: var(--accent-tertiary);
+            animation: glitchBottom 4s infinite;
+        }
+
+        @keyframes glitchTop {
+            0%, 98%, 100% {
+                opacity: 0;
+                transform: translate(0, 0);
+                clip-path: none;
+            }
+            98.5% {
+                opacity: 0.8;
+                transform: translate(-2px, -2px);
+                clip-path: polygon(0 0, 100% 0, 100% 30%, 0 30%);
+            }
+            99% {
+                opacity: 0.8;
+                transform: translate(2px, 1px);
+                clip-path: polygon(0 70%, 100% 70%, 100% 100%, 0 100%);
+            }
+        }
+
+        @keyframes glitchBottom {
+            0%, 98%, 100% {
+                opacity: 0;
+                transform: translate(0, 0);
+                clip-path: none;
+            }
+            98.2% {
+                opacity: 0.8;
+                transform: translate(2px, 2px);
+                clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
+            }
+            99.2% {
+                opacity: 0.8;
+                transform: translate(-1px, -1px);
+                clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+            }
+        }
+
+        /* Typing Demo */
+        .typing-demo {
+            margin: 3rem 0;
+            opacity: 0;
+            animation: fadeIn 1s ease 1.2s forwards;
+        }
+
+        .demo-box {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 4px;
+            padding: 1.5rem 2rem;
+            font-size: 1.25rem;
+            line-height: 2;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-primary);
+        }
+
+        .demo-text {
+            color: var(--text-secondary);
+        }
+
+        .demo-text .typed {
+            color: var(--accent-primary);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .demo-text .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.5rem;
+            background: var(--accent-primary);
+            animation: blink 1s infinite;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+           0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* CTA Button */
+        .cta-section {
+            margin-top: 4rem;
+            opacity: 0;
+            animation: fadeIn 1s ease 1.6s forwards;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            background: transparent;
+            border: 2px solid var(--accent-primary);
+            color: var(--accent-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 1.25rem 3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--accent-primary);
+            transition: left 0.4s ease;
+            z-index: -1;
+        }
+
+        .cta-button:hover {
+            color: var(--bg-primary);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+        }
+
+        .cta-button:hover::before {
+            left: 0;
+        }
+
+        .cta-button .icon {
+            transition: transform 0.3s ease;
+        }
+
+        .cta-button:hover .icon {
+            transform: translateX(4px);
+        }
+
+        /* Stats Section */
+        .stats {
+            display: flex;
+            gap: 4rem;
+            margin-top: 6rem;
+            opacity: 0;
+            animation: fadeIn 1s ease 2s forwards;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Decorative ASCII */
+        .ascii-decoration {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            font-size: 0.6rem;
+            color: rgba(0, 255, 136, 0.3);
+            line-height: 1.2;
+            text-align: right;
+            opacity: 0;
+            animation: fadeIn 1s ease 2.5s forwards;
+        }
+
+        /* Floating Code Blocks */
+        .code-float {
+            position: absolute;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.05);
+            font-family: 'JetBrains Mono', monospace;
+            pointer-events: none;
+        }
+
+        .code-float:nth-child(1) {
+            top: 20%;
+            left: 5%;
+            transform: rotate(-15deg);
+        }
+
+        .code-float:nth-child(2) {
+            top: 60%;
+            right: 8%;
+            transform: rotate(10deg);
+        }
+
+        .code-float:nth-child(3) {
+            bottom: 30%;
+            left: 10%;
+            transform: rotate(-5deg);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav {
+                padding: 1rem 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .stats {
+                gap: 2rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .ascii-decoration {
+                display: none;
+            }
+
+            .code-float {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="logo"><span>Type</span>Quest</div>
+        <div class="nav-links">
+            <a href="practice.html">练习</a>
+            <a href="leaderboard.html">排行榜</a>
+            <a href="achievements.html">成就</a>
+            <a href="about.html">关于</a>
+        </div>
+    </nav>
+
+    <div class="main">
+        <div class="terminal-header">
+            <div class="terminal-prompt">
+                <span class="path">~/quest/start.sh</span>
+                <span class="command">--init</span>
+            </div>
+        </div>
+
+        <!-- Decorative Code Blocks -->
+        <div class="code-float">const speed = calculateWPM();<br>console.log(speed);</div>
+        <div class="code-float">await type.faster();<br>return mastery;</div>
+        <div class="code-float">const accuracy = 100 - errors;</div>
+
+        <section class="hero">
+            <div class="title-wrapper">
+                <h1 class="title">TYPEQUEST</h1>
+            </div>
+
+            <div class="typing-demo">
+                <div class="demo-box">
+                    <p class="demo-text" id="demoText"></p>
+                </div>
+            </div>
+
+            <div class="cta-section">
+                <a href="practice.html" class="cta-button">
+                    <span>开始挑战</span>
+                    <span class="icon">→</span>
+                </a>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value">1M+</div>
+                    <div class="stat-label">用户</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">150+</div>
+                    <div class="stat-label">课程</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">50+</div>
+                    <div class="stat-label">语言</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="ascii-decoration">
+    ╔══════════════════════════╗<br>
+    ║  KEYBOARD.MASTER = true  ║<br>
+    ╚══════════════════════════╝
+    </div>
+
+    <script>
+        // Typing animation for demo text
+        const fullText = "The quick brown fox jumps over the lazy dog";
+        const demoTextEl = document.getElementById('demoText');
+        let currentIndex = 0;
+
+        function typeCharacter() {
+            if (currentIndex < fullText.length) {
+                const char = fullText[currentIndex];
+                const span = document.createElement('span');
+                span.textContent = char;
+                span.className = 'typed';
+
+                // Add typing sound effect visual feedback
+                span.style.animation = 'fadeIn 0.1s ease forwards';
+
+                demoTextEl.appendChild(span);
+                currentIndex++;
+
+                // Add cursor
+                if (!demoTextEl.querySelector('.cursor')) {
+                    const cursor = document.createElement('span');
+                    cursor.className = 'cursor';
+                    demoTextEl.appendChild(cursor);
+                } else {
+                    const cursor = demoTextEl.querySelector('.cursor');
+                    demoTextEl.appendChild(cursor);
+                }
+
+                // Random typing speed for realistic effect
+                const randomDelay = Math.random() * 50 + 50;
+                setTimeout(typeCharacter, randomDelay);
+            } else {
+                // Loop the animation
+                setTimeout(() => {
+                    demoTextEl.innerHTML = '';
+                    currentIndex = 0;
+                    typeCharacter();
+                }, 3000);
+            }
+        }
+
+        // Start typing animation after initial load
+        setTimeout(typeCharacter, 2000);
+
+        // Mouse parallax effect on code blocks
+        document.addEventListener('mousemove', (e) => {
+            const codeFloats = document.querySelectorAll('.code-float');
+            const x = (e.clientX / window.innerWidth - 0.5) * 20;
+            const y = (e.clientY / window.innerHeight - 0.5) * 20;
+
+            codeFloats.forEach((el, index) => {
+                const speed = (index + 1) * 0.5;
+                el.style.transform = `translate(${x * speed}px, ${y * speed}px) rotate(${-15 + index * 8}deg)`;
+            });
+        });
+    </script>
+</body>
+</html>

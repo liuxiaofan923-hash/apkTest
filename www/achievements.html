@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成就 | TypeQuest</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Space+Grotesk:wghtght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --accent-primary: #00ff88;
+            --accent-secondary: #ff00ff;
+            --accent-tertiary: #00d4ff;
+            --text-primary: #ffffff;
+            --text-secondary: #6b7280;
+            --text-dim: #3a3a4a;
+            --gold: #ffd700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* CRT Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(
+                to bottom,
+                var(--bg-primary) 0%,
+                transparent 100%
+            );
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .logo a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a.active {
+            color: var(--accent-primary);
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--accent-primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a.active::after,
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Main Container */
+        .main {
+            min-height: 100vh;
+            padding: 8rem 2rem 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Stats Summary */
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(0, 255, 136, 0.15);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-tertiary));
+        }
+
+        .stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Achievements Grid */
+        .achievements-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 1.5rem;
+            background: var(--accent-primary);
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .achievement-card {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .achievement-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 255, 136, 0.1);
+        }
+
+        .achievement-card.locked {
+            opacity: 0.5;
+            filter: grayscale(1);
+        }
+
+        .achievement-card.locked:hover {
+            opacity: 0.7;
+        }
+
+        .achievement-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .achievement-info {
+            flex: 1;
+        }
+
+        .achievement-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.375rem;
+        }
+
+        .achievement-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .achievement-progress {
+            margin-top: 0.75rem;
+            height: 4px;
+            background: var(--text-dim);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .achievement-progress-fill {
+            height: 100%;
+            background: var(--accent-primary);
+            transition: width 0.3s ease;
+        }
+
+        /* Legendary achievements */
+        .achievement-card.legendary {
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .achievement-card.legendary:hover {
+            border-color: var(--gold);
+            box-shadow: 0 8px 24px rgba(255, 215, 0, 0.2);
+        }
+
+        .achievement-card.legendary .achievement-progress-fill {
+            background: var(--gold);
+        }
+
+        /* Rarity badges */
+        .rarity-badge {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            font-size: 0.625rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .rarity-common { background: var(--text-dim); color: var(--text-secondary); }
+        .rarity-rare { background: rgba(0, 212, 255, 0.2); color: var(--accent-tertiary); }
+        .rarity-epic { background: rgba(255, 0, 255, 0.2); color: var(--accent-secondary); }
+        .rarity-legendary { background: rgba(255, 215, 0, 0.2); color: var(--gold); }
+
+        /* ASCII decoration */
+        .ascii-trophy {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            font-size: 0.6rem;
+            color: rgba(255, 215, 0, 0.3);
+            line-height: 1.2;
+            opacity: 0.5;
+        }
+
+        /* Progress percentage on hover */
+        .progress-text {
+            font-size: 0.625rem;
+            color: var(--accent-primary);
+            margin-top: 0.5rem;
+           ari
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav {
+                padding: 1rem 1.5rem;
+            }
+
+            .nav-links a:not(.active) {
+                display: none;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .stats-summary {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .achievements-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ascii-trophy {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="logo"><a href="index.html">Type</a>Quest</div>
+        <div class="nav-links">
+            <a href="practice.html">练习</a>
+            <a href="leaderboard.html">排行榜</a>
+            <a href="achievements.html" class="active">成就</a>
+            <a href="about.html">关于</a>
+        </div>
+    </nav>
+
+    <div class="main">
+        <div class="header">
+            <h1>成就系统</h1>
+            <p>解锁所有徽章，成为打字大师</p>
+        </div>
+
+        <div class="stats-summary">
+            <div class="stat-card">
+                <div class="stat-value">12</div>
+                <div class="stat-label">已解锁</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">25</div>
+                <div class="stat-label">总成就</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">48%</div>
+                <div class="stat-label">完成度</div>
+            </div>
+        </div>
+
+        <!-- Speed Achievements -->
+        <div class="achievements-section">
+            <div class="section-title">速度成就</div>
+            <div class="achievements-grid" id="speedAchievements"></div>
+        </div>
+
+        <!-- Accuracy Achievements -->
+        <div class="achievements-section">
+            <div class="section-title">准确率成就</div>
+            <div class="achievements-grid" id="accuracyAchievements"></div>
+        </div>
+
+        <!-- Streak Achievements -->
+        <div class="achievements-section">
+            <div class="section-title">连胜成就</div>
+            <div class="achievements-grid" id="streakAchievements"></div>
+        </div>
+
+        <!-- Special Achievements -->
+        <div class="achievements-section">
+            <div class="section-title">特殊成就</div>
+            <div class="achievements-grid" id="specialAchievements"></div>
+        </div>
+    </div>
+
+    <div class="ascii-trophy">
+    ╔══════════════════════════╗<br>
+    ║    👑 ACHIEVEMENTS 👑    ║<br>
+    ╚══════════════════════════╝
+    </div>
+
+    <script>
+        // Achievement data
+        const achievements = {
+            speed: [
+                { icon: '⚡', name: '初学者', desc: '达到 30 WPM', progress: 100, rarity: 'common', unlocked: true },
+                { icon: '🚀', name: '快速打字', desc: '达到 60 WPM', progress: 100, rarity: 'rare', unlocked: true },
+                { icon: '💨', name: '疾风', desc: '达到 100 WPM', progress: 100, rarity: 'epic', unlocked: true },
+                { icon: '🔥', name: '闪电', desc: '达到 150 WPM', progress: 78, rarity: 'legendary', unlocked: false },
+                { icon: '🌟', name: '传说', desc: '达到 200 WPM', progress: 35, rarity: 'legendary', unlocked: false },
+            ],
+            accuracy: [
+                { icon: '🎯', name: '精准', desc: '达到 95% 准确率', progress: 100, rarity: 'common', unlocked: true },
+                { icon: '🏹', name: '神射手', desc: '达到 98% 准确率', progress: 100, rarity: 'rare', unlocked: true },
+                { icon: '🎖️', name: '完美主义者', desc: '达到 99% 准确率', progress: 100, rarity: 'epic', unlocked: true },
+                { icon: '💎', name: '零失误', desc: '100% 准确率完成10次', progress: 60, rarity: 'legendary', unlocked: false },
+            ],
+            streak: [
+                { icon: '📈', name: '开始', desc: '连续练习 3 天', progress: 100, rarity: 'common', unlocked: true },
+                { icon: '🔥', name: '热情', desc: '连续练习 7 天', progress: 100, rarity: 'rare', unlocked: true },
+                { icon: '💪', name: '坚持', desc: '连续练习 30 天', progress: 43, rarity: 'epic', unlocked: false },
+                { icon: '👑', name: '传奇', desc: '连续练习 100 天', progress: 15, rarity: 'legendary', unlocked: false },
+            ],
+            special: [
+                { icon: '🎮', name: '游戏开始', desc: '完成首次练习', progress: 100, rarity: 'common', unlocked: true },
+                { icon: '🏆', name: '锦标赛', desc: '进入排行榜前10', progress: 100, rarity: 'epic', unlocked: true },
+                { icon: '⌨️', name: '键盘大师', desc: '完成 1000 次练习', progress: 67, rarity: 'epic', unlocked: false },
+                { icon: '🌈', name: '彩虹', desc: '解锁所有难度', progress: 75, rarity: 'legendary', unlocked: false },
+            ]
+        };
+
+        // Render achievements
+        function renderAchievements(containerId, data) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = data.map((achievement, index) => `
+                <div class="achievement-card ${achievement.unlocked ? '' : 'locked'} ${achievement.rarity === 'legendary' ? 'legendary' : ''}"
+                     style="animation: fadeSlide 0.5s ease ${index * 0.1}s both">
+                    <span class="rarity-badge rarity-${achievement.rarity}">${achievement.rarity}</span>
+                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-info">
+                        <div class="achievement-name">${achievement.name}</div>
+                        <div class="achievement-desc">${achievement.desc}</div>
+                        <div class="achievement-progress">
+                            <div class="achievement-progress-fill" style="width: ${achievement.progress}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add animation keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeSlide {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize
+        renderAchievements('speedAchievements', achievements.speed);
+        renderAchievements('accuracyAchievements', achievements.accuracy);
+        renderAchievements('streakAchievements', achievements.streak);
+        renderAchievements('specialAchievements', achievements.special);
+
+        // Click effect
+        document.querySelectorAll('.achievement-card').forEach(card => {
+            card.addEventListener('click', function() {
+                if (this.classList.contains('locked')) {
+                    this.style.transform = 'translateX(5px)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
